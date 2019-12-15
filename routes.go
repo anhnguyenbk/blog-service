@@ -11,8 +11,6 @@ type Route struct {
 
 type Routes []Route
 
-const API_VERSION string = "/api/v1/"
-
 var routes = Routes{
 	Route{
 		"PostIndex",

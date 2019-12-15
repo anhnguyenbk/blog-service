@@ -19,7 +19,6 @@ func NewRouter() *mux.Router {
 
 		handler = route.HandlerFunc
 		handler = Logger(handler, route.Name)
-		handler = Cors(handler)
 
 		apiV1.
 			Methods(route.Method, "OPTIONS").

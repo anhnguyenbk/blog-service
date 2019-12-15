@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var posts Posts
 var tableName string = "blog_posts"
 
 func FindAll() Posts {
@@ -34,6 +33,7 @@ func FindAll() Posts {
 		fmt.Println((err.Error()))
 	}
 
+	var posts Posts
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &posts)
 	if err != nil {
 		fmt.Println("Got error unmarshalling:")
@@ -44,11 +44,11 @@ func FindAll() Posts {
 }
 
 func FindById(id string) Post {
-	for _, p := range posts {
-		if p.Id == id {
-			return p
-		}
-	}
+	// for _, p := range posts {
+	// 	if p.Id == id {
+	// 		return p
+	// 	}
+	// }
 	return Post{}
 }
 
