@@ -14,53 +14,71 @@ import (
 
 var tableName string = "blog_posts"
 
-func FindAll() Posts {
+func FindAll() (Posts, error) {
 	svc := createDynamoDBClient()
 
-	// Build the query input parameters
 	params := &dynamodb.ScanInput{
-		// ExpressionAttributeNames:  expr.Names(),
-		// ExpressionAttributeValues: expr.Values(),
-		// FilterExpression:          expr.Filter(),
-		// ProjectionExpression:      expr.Projection(),
 		TableName: aws.String(tableName),
 	}
 
 	// Make the DynamoDB Query API call
 	result, err := svc.Scan(params)
 	if err != nil {
-		fmt.Println("Query API call failed:")
-		fmt.Println((err.Error()))
+		return Posts{}, err
 	}
 
 	var posts Posts
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &posts)
 	if err != nil {
-		fmt.Println("Got error unmarshalling:")
-		fmt.Println(err.Error())
+		return Posts{}, err
 	}
 
-	return posts
+	return posts, nil
 }
 
-func FindById(id string) Post {
-	// for _, p := range posts {
-	// 	if p.Id == id {
-	// 		return p
-	// 	}
-	// }
-	return Post{}
+func FindById(id string) (Post, error) {
+	svc := createDynamoDBClient()
+
+	result, err := svc.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(id),
+			},
+		},
+	})
+
+	if err != nil {
+		return Post{}, err
+	}
+
+	// Unmarshall
+	item := Post{}
+	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
+	if err != nil {
+		return item, fmt.Errorf("Failed to unmarshal Record, %v", err)
+	}
+
+	if (Post{}) == item {
+		return item, fmt.Errorf("Post not found by id %s", id)
+	}
+
+	return item, nil
 }
 
-func Create(post Post) Post {
+func Save(post Post) (Post, error) {
 	dynamodbClient := createDynamoDBClient()
 
-	post.Id = uuid.New().String()
-	post.Date = time.Now()
+	if post.Id == "" {
+		post.Id = uuid.New().String()
+		post.CreatedAt = time.Now()
+	}
+
+	post.UpdatedAt = time.Now()
 
 	av, err := dynamodbattribute.MarshalMap(post)
 	if err != nil {
-		panic(err)
+		return Post{}, err
 	}
 
 	input := &dynamodb.PutItemInput{
@@ -70,10 +88,10 @@ func Create(post Post) Post {
 
 	_, err = dynamodbClient.PutItem(input)
 	if err != nil {
-		panic(err)
+		return Post{}, err
 	}
 
-	return post
+	return post, nil
 }
 
 func createDynamoDBClient() *dynamodb.DynamoDB {

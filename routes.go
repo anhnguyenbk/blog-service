@@ -1,12 +1,10 @@
 package main
 
-import "net/http"
-
 type Route struct {
 	Name        string
 	Method      string
 	Pattern     string
-	HandlerFunc http.HandlerFunc
+	HandlerFunc errorHandler
 }
 
 type Routes []Route
@@ -22,7 +20,13 @@ var routes = Routes{
 		"PostCreate",
 		"POST",
 		"/posts",
-		PostCreate,
+		PostSave,
+	},
+	Route{
+		"PostUpdate",
+		"POST",
+		"/posts/{postId}",
+		PostSave,
 	},
 	Route{
 		"PostShow",

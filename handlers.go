@@ -11,53 +11,71 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome!")
-}
+type errorHandler func(http.ResponseWriter, *http.Request) (int, error)
 
-func PostIndex(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("INDEXXX")
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(post.FindAll()); err != nil {
-		panic(err)
+// Our appHandler type will now satisify http.Handler
+func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if status, err := fn(w, r); err != nil {
+		fmt.Println(err)
+
+		switch status {
+		// We can have cases as granular as we like, if we wanted to
+		// return custom errors for specific status codes.
+		case http.StatusNotFound:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprintf(w, `{"code":404,"message":%q}`, "Not found: "+err.Error())
+			return
+		// case http.StatusInternalServerError:
+		// 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		default:
+			// Catch any other errors we haven't explicitly handled
+			// http.Error(w, ErrorResponse{status, err}, http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, `{"code":500,"message":%q}`, "An unexpected error has occurred: "+err.Error())
+			return
+		}
 	}
 }
 
-func PostCreate(w http.ResponseWriter, r *http.Request) {
+func PostIndex(w http.ResponseWriter, r *http.Request) (int, error) {
+	posts, err := post.FindAll()
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	json.NewEncoder(w).Encode(posts)
+	return http.StatusOK, nil
+}
+
+func PostSave(w http.ResponseWriter, r *http.Request) (int, error) {
 	var _post post.Post
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		panic(err)
+		return http.StatusInternalServerError, err
 	}
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
+
 	if err := json.Unmarshal(body, &_post); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(422) // unprocessable entity
-		if err := json.NewEncoder(w).Encode(err); err != nil {
-			panic(err)
-		}
+		return http.StatusInternalServerError, err
 	}
 
-	t := post.Create(_post)
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "*")
-	w.WriteHeader(http.StatusCreated)
-
-	if err := json.NewEncoder(w).Encode(t); err != nil {
-		panic(err)
+	post, err := post.Save(_post)
+	if err != nil {
+		return http.StatusInternalServerError, err
 	}
+	json.NewEncoder(w).Encode(post)
+	return http.StatusOK, nil
 }
 
-func PostShow(w http.ResponseWriter, r *http.Request) {
+func PostShow(w http.ResponseWriter, r *http.Request) (int, error) {
 	vars := mux.Vars(r)
-	postId := vars["postId"]
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(post.FindById(postId)); err != nil {
-		panic(err)
+	postID := vars["postId"]
+	post, err := post.FindById(postID)
+	if err != nil {
+		return http.StatusInternalServerError, err
 	}
+
+	json.NewEncoder(w).Encode(post)
+	return http.StatusOK, nil
 }
