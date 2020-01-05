@@ -2,4 +2,8 @@
 **/.DS_Store
 
 ## Binary
-blog-service
+bin/**
+main.zip
+
+# IDE
+.vscode
