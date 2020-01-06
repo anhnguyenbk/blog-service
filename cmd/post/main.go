@@ -27,12 +27,12 @@ func main() {
 	router := mux.NewRouter()
 	router.Use(accessControlMiddleware)
 
-	router.HandleFunc("/", post.PostIndex).Methods("GET")
-	router.HandleFunc("/", post.PostSave).Methods("POST")
-	router.HandleFunc("/slug/{slug}", post.PostShowBySlug).Methods("GET")
-	router.HandleFunc("/{id}", post.PostShow).Methods("GET")
-	router.HandleFunc("/{id}", post.PostSave).Methods("POST")
-	router.HandleFunc("/{id}", post.PostDelete).Methods("DELETE")
+	router.HandleFunc("/", post.PostIndex).Methods("GET", "OPTIONS")
+	router.HandleFunc("/", post.PostSave).Methods("POST", "OPTIONS")
+	router.HandleFunc("/slug/{slug}", post.PostShowBySlug).Methods("GET", "OPTIONS")
+	router.HandleFunc("/{id}", post.PostShow).Methods("GET", "OPTIONS")
+	router.HandleFunc("/{id}", post.PostSave).Methods("POST", "OPTIONS")
+	router.HandleFunc("/{id}", post.PostDelete).Methods("DELETE", "OPTIONS")
 
 	// Local http
 	// http.ListenAndServe(":3000", nil)
