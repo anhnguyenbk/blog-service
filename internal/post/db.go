@@ -170,3 +170,23 @@ func Delete(id string) error {
 
 	return nil
 }
+
+func FindByCategory(slug string) (Posts, error) {
+	// Not supporting: Filtering / Querying by the Contents of a List in DynamoDB
+	// https://forums.aws.amazon.com/thread.jspa?messageID=585008&#585008
+
+	posts, err := FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	result := Posts{}
+	for _, post := range posts {
+		for _, category := range post.Categories {
+			if category.Value == slug {
+				result = append(result, post)
+			}
+		}
+	}
+	return result, nil
+}

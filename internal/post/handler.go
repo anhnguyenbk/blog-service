@@ -3,14 +3,30 @@ package post
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func PostIndex(w http.ResponseWriter, r *http.Request) {
 	posts, err := FindAll()
+	if err != nil {
+		fmt.Println(err.Error())
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	b, err := json.Marshal(posts)
+	fmt.Fprint(w, string(b))
+}
+
+func PostByCategory(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	category := vars["slug"]
+
+	posts, err := FindByCategory(category)
 	if err != nil {
 		fmt.Println(err.Error())
 
@@ -74,7 +90,6 @@ func PostSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	// Unmarshal
 	if err := json.Unmarshal(body, &_post); err != nil {
 		fmt.Println(err.Error())
@@ -96,7 +111,6 @@ func PostSave(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(post)
 	fmt.Fprint(w, string(b))
 }
-
 
 func PostDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
