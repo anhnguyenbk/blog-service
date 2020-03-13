@@ -2,6 +2,7 @@ package post // import "github.com/anhnguyenbk/blog-service/internal/post"
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -189,4 +190,139 @@ func FindByCategory(slug string) (Posts, error) {
 		}
 	}
 	return result, nil
+}
+
+func SaveComment(postId string, comment Comment) (Comment, error) {
+	comment.Id = uuid.New().String()
+	comment.CreatedAt = time.Now()
+	comment.UpdatedAt = time.Now()
+	comment.Reply = Comments{}
+
+	dynamoDbItem, err := dynamodbattribute.Marshal(comment)
+	if err != nil {
+		return Comment{}, err
+	}
+
+	var comments []*dynamodb.AttributeValue
+	comments = append(comments, dynamoDbItem)
+
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(postId),
+			},
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":comment": {
+				L: comments,
+			},
+			":empty_list": {
+				L: []*dynamodb.AttributeValue{},
+			},
+		},
+		ReturnValues:     aws.String("UPDATED_NEW"),
+		UpdateExpression: aws.String("SET comments = list_append(if_not_exists(comments, :empty_list), :comment)"),
+	}
+
+	_, err = db.UpdateItem(input)
+	if err != nil {
+		return Comment{}, err
+	}
+	return comment, nil
+}
+
+func PostGetComments(postId string) (Comments, error) {
+	// GetItem with projection expression https://www.dynamodbguide.com/inserting-retrieving-items#get-item
+	// Get comments only
+	var fields = "comments"
+	result, err := db.GetItem(&dynamodb.GetItemInput{
+		TableName:            aws.String(tableName),
+		ProjectionExpression: &fields,
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(postId),
+			},
+		},
+	})
+
+	if err != nil {
+		return Comments{}, err
+	}
+
+	//fmt.Println(result)
+	// Unmarshall
+	item := Post{}
+	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
+	if err != nil {
+		return Comments{}, err
+	}
+	return item.Comments, nil
+}
+
+func PostDeleteComment(postId string, commentId string) error {
+	post, err := getItemFieldsById(postId, "comments")
+	foundCommentIndex := indexOfComment(commentId, post.Comments)
+
+	if foundCommentIndex == -1 {
+		return nil
+	}
+
+	var updateExpression = "REMOVE comments[" + strconv.Itoa(foundCommentIndex) + "]"
+	input := &dynamodb.UpdateItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(postId),
+			},
+		},
+		ReturnValues:     aws.String("UPDATED_NEW"),
+		UpdateExpression: aws.String(updateExpression),
+	}
+
+	_, err = db.UpdateItem(input)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getItemFieldsById(id string, fields string) (Post, error) {
+	result, err := db.GetItem(&dynamodb.GetItemInput{
+		TableName:            aws.String(tableName),
+		ProjectionExpression: &fields,
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(id),
+			},
+		},
+	})
+
+	if err != nil {
+		return Post{}, err
+	}
+
+	//fmt.Println(result)
+	// Unmarshall
+	item := Post{}
+	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
+	if err != nil {
+		return Post{}, err
+	}
+
+	return item, nil
+}
+
+func indexOfComment(commentId string, comments []Comment) int {
+	if comments == nil {
+		return -1
+	}
+
+	for k, v := range comments {
+		if commentId == v.Id {
+			return k
+		}
+	}
+	return -1 //not found.
 }

@@ -9,6 +9,17 @@ type Category struct {
 
 type Categories []Category
 
+type Comment struct {
+	Id        string    `json:"id"`
+	User      string    `json:"user"`
+	Content   string    `json:"content"`
+	Reply     Comments  `json:"comments"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type Comments []Comment
+
 type Post struct {
 	Id         string     `json:"id"`
 	Title      string     `json:"title"`
@@ -19,6 +30,7 @@ type Post struct {
 	Categories Categories `json:"categories"`
 	CreatedAt  time.Time  `json:"createdAt"`
 	UpdatedAt  time.Time  `json:"updatedAt"`
+	Comments   Comments   `json:"comments"`
 }
 
 type Posts []Post
