@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/akrylysov/algnhsa"
 	"github.com/anhnguyenbk/blog-service/internal/helper"
 	"github.com/anhnguyenbk/blog-service/internal/post"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func main() {
@@ -25,8 +25,8 @@ func main() {
 	router.HandleFunc("/posts/{id}", post.DeletePostHandler).Methods("DELETE", "OPTIONS")
 
 	// Local http
-	http.ListenAndServe(":8080", router)
+	//http.ListenAndServe(":8080", router)
 
 	// AWS Lambda
-	//algnhsa.ListenAndServe(router, nil)
+	algnhsa.ListenAndServe(router, nil)
 }

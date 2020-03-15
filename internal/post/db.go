@@ -105,7 +105,7 @@ func FindBySlug(slug string) (Post, error) {
 	}
 
 	posts := Posts{}
-	fmt.Println(result)
+	//fmt.Println(result)
 	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &posts)
 	if err != nil {
 		return Post{}, err
