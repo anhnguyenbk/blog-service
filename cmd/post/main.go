@@ -4,12 +4,16 @@ import (
 	"github.com/akrylysov/algnhsa"
 	"github.com/anhnguyenbk/blog-service/internal/helper"
 	"github.com/anhnguyenbk/blog-service/internal/post"
+	"github.com/anhnguyenbk/blog-service/internal/user"
 	"github.com/gorilla/mux"
 )
 
 func main() {
 	router := mux.NewRouter()
 	router.Use(helper.CORSMiddleware, helper.LoggerMiddleware)
+
+	// Users
+	router.HandleFunc("/auth/token", user.AuthenticateHandler).Methods("POST", "OPTIONS")
 
 	// CommentAPI
 	router.HandleFunc("/posts/{postId}/comments", post.GetCommentsHandler).Methods("GET", "OPTIONS")

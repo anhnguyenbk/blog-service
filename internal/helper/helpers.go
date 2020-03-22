@@ -29,10 +29,18 @@ func ParsePathParam(r *http.Request, name string) string {
 func ResponseError(w http.ResponseWriter, err error) {
 	// Log the error
 	fmt.Println(err.Error())
-
-	_json, err := json.Marshal(shared.ToResponseError(err))
+	_json, err := json.Marshal(shared.ToErrorResponse(shared.ToStatusError(err)))
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprint(w, string(_json))
+}
+
+func ResponseErrorWithStatus(w http.ResponseWriter, status int, err error) {
+	// Log the error
+	fmt.Println(err.Error())
+	_json, err := json.Marshal(shared.ToErrorResponse(shared.StatusError{status, err.Error()}))
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
 	fmt.Fprint(w, string(_json))
 }
 

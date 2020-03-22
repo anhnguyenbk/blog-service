@@ -1,14 +1,17 @@
 package shared
 
-type CodeError struct {
-	Code    int    `json:"code"`
+type StatusError struct {
+	Status  int    `json:"status"`
 	Message string `json:"message"`
 }
-type ResponseError struct {
-	Error CodeError `json:"error"`
+type ErrorResponse struct {
+	Error StatusError `json:"error"`
 }
 
-func ToResponseError(err error) ResponseError {
-	var codeError = CodeError{500, err.Error()}
-	return ResponseError{codeError}
+func ToStatusError(err error) StatusError {
+	return StatusError{500, err.Error()}
+}
+
+func ToErrorResponse(statusError StatusError) ErrorResponse {
+	return ErrorResponse{statusError}
 }
