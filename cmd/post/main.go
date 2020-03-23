@@ -11,7 +11,7 @@ import (
 
 func main() {
 	router := mux.NewRouter()
-	router.Use(middleware.CORSMiddleware, middleware.AuthMiddleware, middleware.LoggerMiddleware)
+	router.Use(middleware.CORS, middleware.Auth, middleware.Logger)
 
 	// Users
 	router.HandleFunc("/auth/token", user.AuthenticateHandler).Methods("POST", "OPTIONS")
