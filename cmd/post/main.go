@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/akrylysov/algnhsa"
-	"github.com/anhnguyenbk/blog-service/internal/helper"
+	"net/http"
+
+	"github.com/anhnguyenbk/blog-service/internal/middleware"
 	"github.com/anhnguyenbk/blog-service/internal/post"
 	"github.com/anhnguyenbk/blog-service/internal/user"
 	"github.com/gorilla/mux"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	router := mux.NewRouter()
-	router.Use(helper.CORSMiddleware, helper.LoggerMiddleware)
+	router.Use(middleware.CORSMiddleware, middleware.AuthMiddleware, middleware.LoggerMiddleware)
 
 	// Users
 	router.HandleFunc("/auth/token", user.AuthenticateHandler).Methods("POST", "OPTIONS")
@@ -29,8 +30,8 @@ func main() {
 	router.HandleFunc("/posts/{id}", post.DeletePostHandler).Methods("DELETE", "OPTIONS")
 
 	// Local http
-	//http.ListenAndServe(":8080", router)
+	http.ListenAndServe(":8080", router)
 
 	// AWS Lambda
-	algnhsa.ListenAndServe(router, nil)
+	//algnhsa.ListenAndServe(router, nil)
 }

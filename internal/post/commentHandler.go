@@ -3,45 +3,46 @@ package post
 import (
 	"net/http"
 
-	"github.com/anhnguyenbk/blog-service/internal/helper"
+	"github.com/anhnguyenbk/blog-service/internal/util/requestutils"
+	"github.com/anhnguyenbk/blog-service/internal/util/responseutils"
 )
 
 func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	var _comment Comment
 
-	postId := helper.ParsePathParam(r, "postId")
-	err := helper.ParseJSONBody(r, &_comment)
+	postId := requestutils.ParsePathParam(r, "postId")
+	err := requestutils.ParseJSONBody(r, &_comment)
 	if err != nil {
-		helper.ResponseError(w, err)
+		responseutils.ResponseError(w, err)
 		return
 	}
 
 	comment, err := SaveComment(postId, _comment)
 	if err != nil {
-		helper.ResponseError(w, err)
+		responseutils.ResponseError(w, err)
 		return
 	}
-	helper.ResponseJSON(w, comment)
+	responseutils.ResponseJSON(w, comment)
 }
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request) {
-	postId := helper.ParsePathParam(r, "postId")
+	postId := requestutils.ParsePathParam(r, "postId")
 
 	comments, err := PostGetComments(postId)
 	if err != nil {
-		helper.ResponseError(w, err)
+		responseutils.ResponseError(w, err)
 		return
 	}
-	helper.ResponseJSON(w, comments)
+	responseutils.ResponseJSON(w, comments)
 }
 
 func DeleteCommentHandler(w http.ResponseWriter, r *http.Request) {
-	postId := helper.ParsePathParam(r, "postId")
-	commentId := helper.ParsePathParam(r, "commentId")
+	postId := requestutils.ParsePathParam(r, "postId")
+	commentId := requestutils.ParsePathParam(r, "commentId")
 
 	err := PostDeleteComment(postId, commentId)
 	if err != nil {
-		helper.ResponseError(w, err)
+		responseutils.ResponseError(w, err)
 		return
 	}
 }

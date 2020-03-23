@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/anhnguyenbk/blog-service/internal/helper"
-	"github.com/dgrijalva/jwt-go"
 	"time"
+
+	"github.com/anhnguyenbk/blog-service/internal/util/requestutils"
+	"github.com/anhnguyenbk/blog-service/internal/util/responseutils"
+	"github.com/dgrijalva/jwt-go"
 )
 
 func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
 	var loginRequest LoginRequest
 
-	err := helper.ParseJSONBody(r, &loginRequest)
+	err := requestutils.ParseJSONBody(r, &loginRequest)
 	if err != nil {
-		helper.ResponseError(w, err)
+		responseutils.ResponseError(w, err)
 		return
 	}
 
@@ -24,7 +26,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
 		// Log the real error
 		fmt.Println(err)
 
-		helper.ResponseErrorWithStatus(w, 401, fmt.Errorf("Invalid username or password"))
+		responseutils.ResponseErrorWithStatus(w, 401, fmt.Errorf("Invalid username or password"))
 		return
 	}
 
@@ -41,7 +43,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
 
 	tokenString, error := token.SignedString([]byte("anXvwW"))
 	if error != nil {
-		helper.ResponseError(w, err)
+		responseutils.ResponseError(w, err)
 		return
 	}
 
@@ -50,5 +52,5 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
 		TokenType: "Bearer",
 		ExpiresIn: expiresAt,
 	}
-	helper.ResponseJSON(w, authToken)
+	responseutils.ResponseJSON(w, authToken)
 }

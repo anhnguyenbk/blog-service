@@ -10,4 +10,5 @@ require (
 	github.com/gorilla/mux v1.7.3
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
+	gopkg.in/yaml.v2 v2.2.2
 )

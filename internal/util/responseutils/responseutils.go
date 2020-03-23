@@ -1,35 +1,31 @@
-package helper // import "github.com/anhnguyenbk/blog-service/internal/helper"
+package responseutils
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/anhnguyenbk/blog-service/internal/shared"
-	"github.com/gorilla/mux"
 )
 
-func ParseJSONBody(r *http.Request, dst interface{}) error {
-	// Get request body
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	err := dec.Decode(&dst)
-	if err != nil {
-		return err
-	}
-
-	return nil
+type StatusError struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+type ErrorResponse struct {
+	Error StatusError `json:"error"`
 }
 
-func ParsePathParam(r *http.Request, name string) string {
-	return mux.Vars(r)[name]
+func ToStatusError(err error) StatusError {
+	return StatusError{500, err.Error()}
+}
+
+func ToErrorResponse(statusError StatusError) ErrorResponse {
+	return ErrorResponse{statusError}
 }
 
 func ResponseError(w http.ResponseWriter, err error) {
 	// Log the error
 	fmt.Println(err.Error())
-	_json, err := json.Marshal(shared.ToErrorResponse(shared.ToStatusError(err)))
+	_json, err := json.Marshal(ToErrorResponse(ToStatusError(err)))
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
 	fmt.Fprint(w, string(_json))
@@ -38,7 +34,7 @@ func ResponseError(w http.ResponseWriter, err error) {
 func ResponseErrorWithStatus(w http.ResponseWriter, status int, err error) {
 	// Log the error
 	fmt.Println(err.Error())
-	_json, err := json.Marshal(shared.ToErrorResponse(shared.StatusError{status, err.Error()}))
+	_json, err := json.Marshal(ToErrorResponse(StatusError{status, err.Error()}))
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 	fmt.Fprint(w, string(_json))
