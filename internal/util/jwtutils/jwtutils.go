@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/anhnguyenbk/blog-service/internal/config"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -30,8 +31,6 @@ type AuthTokenClaim struct {
 	TokenPayload
 }
 
-const SECRET = "anXvwW"
-
 func ExtractBearerTokenFromRequest(r *http.Request) string {
 	reqToken := r.Header.Get("Authorization")
 	splitToken := strings.Split(reqToken, "Bearer")
@@ -52,7 +51,7 @@ func GenerateToken(payload TokenPayload) (AuthToken, error) {
 		payload,
 	}
 
-	tokenString, err := token.SignedString([]byte(SECRET))
+	tokenString, err := token.SignedString([]byte(config.JWT_SECRET))
 	if err != nil {
 		return AuthToken{}, err
 	}
@@ -71,7 +70,7 @@ func Verify(tokenString string) (jwt.MapClaims, error) {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 
-		secret := []byte(SECRET)
+		secret := []byte(config.JWT_SECRET)
 		return secret, nil
 	})
 
