@@ -1,11 +1,14 @@
 const express = require('express')
+var bodyParser = require('body-parser')
+
 const app = express()
 const port = 3000
+// parse application/json
+app.use(bodyParser.json())
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+const appRoutes = require('./src/routes/index')(app)
+//const db = require('./src/dbs/index')
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+var server = app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+});
