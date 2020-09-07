@@ -5,7 +5,7 @@ Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
-      DefinitionUri: s3://anhngblog/74e974d8da903de395a44d54a8bd4161
+      DefinitionUri: s3://anhngblog/d34453898ee550e23be8f3efe07c2210
       StageName: prod
       Variables:
         LambdaFunctionName:
@@ -54,7 +54,7 @@ Resources:
   AnhngBlogFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://anhngblog/34870794a4c3778fca0a517afcda02b8
+      CodeUri: s3://anhngblog/e7fe98785d1c98e20e62a8cb6f010e3b
       Handler: lambda.handler
       MemorySize: 1024
       Role:
