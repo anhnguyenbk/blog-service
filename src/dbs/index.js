@@ -1,18 +1,18 @@
 "use strict";
 
 const {MongoClient} = require('mongodb');
+const config = require('config');
 
-const uri = "mongodb+srv://anhngnet:f0HQ7scGSqYUoPcK@cluster0.vbmqb.mongodb.net?retryWrites=true&w=majority";
-const db_name = "anhngblog";
+const dbConfig = config.get('dbConfig');
 
 var db;
 
 module.exports = new Promise(function(resolve, reject) {
     if (db == undefined) {
-        console.log("Connect to " + uri);
-        MongoClient.connect(uri, { useNewUrlParser: true, poolSize: 10 })
+        console.log("Connect to " + dbConfig.uri);
+        MongoClient.connect(dbConfig.uri, { useNewUrlParser: true, poolSize: dbConfig.poolSize })
             .then(client => {
-                db = client.db(db_name)
+                db = client.db(dbConfig.dbName)
                 resolve(db);
             })
             .catch(err => {

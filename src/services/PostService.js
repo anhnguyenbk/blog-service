@@ -1,6 +1,25 @@
-var postCollection;
-var dbs = require('../dbs/index').then(function (db) {
-    postCollection = db.collection("posts")
+//var postCollection;
+// var dbs = require('../dbs/index').then(function (db) {
+//     postCollection = db.collection("posts")
+// });
+
+
+const {MongoClient} = require('mongodb');
+const config = require('config');
+
+const dbConfig = config.get('dbConfig');
+var getDb = () => new Promise(function(resolve, reject) {
+    console.log("Connect to " + dbConfig.uri);
+    MongoClient.connect(dbConfig.uri, { useNewUrlParser: true, poolSize: dbConfig.poolSize })
+            .then(client => {
+                db = client.db(dbConfig.dbName)
+                resolve(db);
+            })
+            .catch(err => {
+                console.log("Cannot connect to " + dbConfig.uri, err);
+                console.error(err);
+                reject (err)
+            });
 });
 
 class PostService {
@@ -9,6 +28,9 @@ class PostService {
     }
 
     async getList() {
+        const db = await getDb();
+        var postCollection = db.collection("posts")
+
         const query = {
             status: {
                 $eq: 'published'
