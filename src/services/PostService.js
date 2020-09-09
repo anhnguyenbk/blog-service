@@ -1,61 +1,68 @@
-//var postCollection;
-// var dbs = require('../dbs/index').then(function (db) {
-//     postCollection = db.collection("posts")
-// });
-
-
-const {MongoClient} = require('mongodb');
-const config = require('config');
-
-const dbConfig = config.get('dbConfig');
-var getDb = () => new Promise(function(resolve, reject) {
-    console.log("Connect to " + dbConfig.uri);
-    MongoClient.connect(dbConfig.uri, { useNewUrlParser: true, poolSize: dbConfig.poolSize })
-            .then(client => {
-                db = client.db(dbConfig.dbName)
-                resolve(db);
-            })
-            .catch(err => {
-                console.log("Cannot connect to " + dbConfig.uri, err);
-                console.error(err);
-                reject (err)
-            });
-});
+const {Connection} = require('../db/index');
+const { v4: uuidv4 } = require('uuid');
 
 class PostService {
     constructor() {
-        //this.collection = db.collection("posts")
+        this.conn = new Connection();
     }
 
-    async getList() {
-        const db = await getDb();
-        var postCollection = db.collection("posts")
+    async list(req) {
+        const collection = await this.conn.getPostCollection();
 
         const query = {
             status: {
                 $eq: 'published'
             }
         };
-        // // const options = {
-        // //   // sort returned documents in ascending order by title (A->Z)
-        // //   sort: { title: 1 },
-        // // // Include only the `title` and `imdb` fields in each returned document
-        // //   projection: { _id: 0, title: 1, imdb: 1 },
-        // // };
-        // console.log(postCollection)
-        const cursor = postCollection.find(query);
-        return await cursor.toArray();
 
-        return []
+        const options = {
+          sort: { createdAt: 1 },
+        };
+        const cursor = collection.find(query, options);
+        return await cursor.toArray();
+    }
+
+    async get(id) {
+        const collection = await this.conn.getPostCollection();
+
+        console.log(`Get post with the _id: ${id}`);
+        var query = { _id: id };
+        return await collection.findOne(query);
     }
 
     async create(post) {
+        const collection = await this.conn.getPostCollection();
+
+        post._id = uuidv4();
         post.createdAt = Date.now();
         post.updatedAt = Date.now();
 
-        const result = await postCollection.insertOne(post);
+        const result = await collection.insertOne(post);
         console.log(`Post inserted with the _id: ${result.insertedId}`);
         return result.ops[0];
+    }
+
+    async update(id, post) {
+        const collection = await this.conn.getPostCollection();
+
+        var query = { _id: id };
+        var values = { $set: { 
+            title: post.title, 
+            slug: post.slug, 
+            desc: post.desc, 
+            content: post.content, 
+            updatedAt: Date.now() 
+        } }
+        const result = await collection.findOneAndUpdate(query, values, { returnOriginal: false });
+        console.log(`Post updated with the _id: ${id}`);
+        return result.value
+    }
+
+    async delete(id) {
+        const collection = await this.conn.getPostCollection();
+        var query = { _id: id };
+        var values = { $set: {status: "deleted" } };
+        await collection.updateOne(query, values);
     }
 };
 
