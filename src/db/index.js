@@ -15,6 +15,11 @@ class Connection {
         return conn.collection("posts");
     }
 
+    async getUserCollection() {
+        var conn = await this.openConnection();
+        return conn.collection("users");
+    }
+
     openConnection() {
         return new Promise((resolve, reject) => {
             if (db == undefined) {
