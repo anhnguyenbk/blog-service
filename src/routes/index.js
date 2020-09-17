@@ -8,8 +8,10 @@ module.exports = function (app) {
     app.post('/auth/token', userController.auth)
 
     // Posts
-    app.get('/posts', postController.list);
+    app.get('/posts', postController.listAll);
+    app.get('/posts/published', postController.listPublished);
     app.get('/posts/:id', postController.get);
+    app.get('/posts/slug/:slug', postController.getBySlug);
     app.post('/posts', postController.create);
     app.put('/posts/:id', postController.update);
     app.delete('/posts/:id', postController.delete);

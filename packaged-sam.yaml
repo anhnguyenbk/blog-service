@@ -54,7 +54,7 @@ Resources:
   AnhngBlogFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://anhngblog/b7494c32811330ceed3d3d75b94ceb86
+      CodeUri: s3://anhngblog/73e5f8fd5f9cc68971eccd76b09bbcc8
       Handler: lambda.handler
       MemorySize: 1024
       Role:

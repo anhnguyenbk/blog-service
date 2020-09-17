@@ -4,12 +4,20 @@ const {PostService} = require('../services/PostService');
 const postService = new PostService();
 
 let postController = {
-    list: async function (req, res) {
-        res.json(await postService.list(req));
+    listAll: async function (req, res) {
+        res.json(await postService.listAll(req));
+    },
+    
+    listPublished: async function (req, res) {
+        res.json(await postService.listPublished(req));
     },
 
     get: async function (req, res) {
         res.json(await postService.get(req.params.id));
+    },
+
+    getBySlug: async function (req, res) {
+        res.json(await postService.getBySlug(req.params.slug));
     },
 
     create: async function (req, res) {

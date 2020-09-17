@@ -1,7 +1,7 @@
 const {Connection} = require('../db/index');
 const { v4: uuidv4 } = require('uuid');
 var jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 const config = require('config');
 
 const signKey = config.get('signKey');

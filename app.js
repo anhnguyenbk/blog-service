@@ -1,8 +1,8 @@
 'use strict'
 
 const express = require('express')
-var bodyParser = require('body-parser')
-var cors = require('body-parser')
+const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const app = express()
 

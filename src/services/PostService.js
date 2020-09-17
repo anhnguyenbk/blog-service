@@ -6,15 +6,26 @@ class PostService {
         this.conn = new Connection();
     }
 
-    async list(req) {
-        const collection = await this.conn.getPostCollection();
+    async listAll(req) {
+        const query = {
+            status: {
+                $ne: 'deleted'
+            }
+        };
+        return await this.list(query)
+    }
 
+    async listPublished(req) {
         const query = {
             status: {
                 $eq: 'published'
             }
         };
+        return await this.list(query);
+    }
 
+    async list(query) {
+        const collection = await this.conn.getPostCollection();
         const options = {
           sort: { createdAt: 1 },
         };
@@ -27,6 +38,14 @@ class PostService {
 
         console.log(`Get post with the _id: ${id}`);
         var query = { _id: id };
+        return await collection.findOne(query);
+    }
+
+    async getBySlug(slug) {
+        const collection = await this.conn.getPostCollection();
+
+        console.log(`Get post with the slug: ${slug}`);
+        var query = { slug: slug };
         return await collection.findOne(query);
     }
 
