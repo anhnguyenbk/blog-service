@@ -20,6 +20,10 @@ let postController = {
         res.json(await postService.getBySlug(req.params.slug));
     },
 
+    getByCategory: async function (req, res) {
+        res.json(await postService.getByCategory(req.params.id));
+    },
+
     create: async function (req, res) {
         res.json(await postService.create(req.body));
     },

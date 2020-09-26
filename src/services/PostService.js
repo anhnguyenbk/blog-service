@@ -12,7 +12,7 @@ class PostService {
                 $ne: 'deleted'
             }
         };
-        return await this.list(query)
+        return await this.findAll(query)
     }
 
     async listPublished(req) {
@@ -21,32 +21,24 @@ class PostService {
                 $eq: 'published'
             }
         };
-        return await this.list(query);
-    }
-
-    async list(query) {
-        const collection = await this.conn.getPostCollection();
-        const options = {
-          sort: { createdAt: 1 },
-        };
-        const cursor = collection.find(query, options);
-        return await cursor.toArray();
+        return await this.findAll(query);
     }
 
     async get(id) {
-        const collection = await this.conn.getPostCollection();
-
-        console.log(`Get post with the _id: ${id}`);
-        var query = { _id: id };
-        return await collection.findOne(query);
+        return await this.findOne({ _id: id })
     }
 
     async getBySlug(slug) {
-        const collection = await this.conn.getPostCollection();
+        return await this.findOne({ slug: slug });
+    }
 
-        console.log(`Get post with the slug: ${slug}`);
-        var query = { slug: slug };
-        return await collection.findOne(query);
+    async getByCategory(id) {
+        return await this.findAll({ 
+            categories: id, 
+            status: {
+                $eq: 'published'
+            }
+        });
     }
 
     async create(post) {
@@ -82,6 +74,42 @@ class PostService {
         var query = { _id: id };
         var values = { $set: {status: "deleted" } };
         await collection.updateOne(query, values);
+    }
+
+    async findOne(query) {
+        const collection = await this.conn.getPostCollection();
+
+        console.log(`findOne post by query: ${JSON.stringify(query)}`);
+        const cursor = collection.aggregate([
+            { "$match": query },
+            {
+                "$lookup": {
+                    "from": "categories",
+                    "localField": "categories",
+                    "foreignField": "_id",
+                    "as": "categories"
+                }
+            }
+        ]);
+        return (await cursor.toArray())[0];
+    }
+
+    async findAll(query) {
+        console.log(`find all post by query: ${JSON.stringify(query)}`);
+
+        const collection = await this.conn.getPostCollection();
+        const cursor = collection.aggregate([
+            { "$match": query },
+            {
+                "$lookup": {
+                    "from": "categories",
+                    "localField": "categories",
+                    "foreignField": "_id",
+                    "as": "categories"
+                }
+            }
+        ]);
+        return await cursor.toArray();
     }
 };
 

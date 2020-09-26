@@ -20,6 +20,11 @@ class Connection {
         return conn.collection("users");
     }
 
+    async getCategoryCollection() {
+        var conn = await this.openConnection();
+        return conn.collection("categories");
+    }
+
     openConnection() {
         return new Promise((resolve, reject) => {
             if (db == undefined) {

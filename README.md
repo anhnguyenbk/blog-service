@@ -1,36 +1,13 @@
 # Tobi's blog Service
-Blog servie written on Golang and deployment on AWS lambda.
+Blog servie written on Express and deployment on AWS lambda.
 
 ## Getting Started
 ### Installing
-Build local package
-```make build-local```
+Run locally
+```npm start```
 
-Run the binary
-```./bin/main```
-
-## Deployment
-Please read https://docs.aws.amazon.com/lambda/latest/dg/lambda-go-how-to-create-deployment-package.html for 
-the deployment details.
-
-### Build package for AWS lambda
-Enable algnhsa AWS Lambda Go net/http server adapter (https://github.com/akrylysov/algnhsa)
-
-Build package
-```make build```
-
-### Create a AWS lambda function (for the first time)
-```
-aws lambda create-function --function-name blog-post-function --runtime go1.x \
-  --zip-file fileb://main.zip --handler main \
-  --role arn:aws:iam::705179926964:role/lambda-role
- ```
- 
-### Deploy
-```make deploy```
-
-### Create a API Gateway to trigger the function
-Please read https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html
+## Deploy on AWS Lambda
+```npm run setup```
 
 ## Contributing
 
