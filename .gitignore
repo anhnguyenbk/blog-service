@@ -1,9 +1,12 @@
 ## MasOS
 **/.DS_Store
 
-## Binary
-bin/**
-main.zip
+## Node_modules
+node_modules
 
-# IDE
+## Config
+config/production.json
+
+## IDE
 .vscode
+.idea

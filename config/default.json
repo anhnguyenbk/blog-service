@@ -1,0 +1,8 @@
+{
+  "dbConfig": {
+    "uri": "mongodb://localhost:27017",
+    "dbName": "anhngblog",
+    "poolSise": 10
+  },
+  "signKey": "PGCdcl"
+}
