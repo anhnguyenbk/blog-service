@@ -1,5 +1,5 @@
-# Tobi's blog Service
-Blog servie written on Express and deployment on AWS lambda.
+# Anhng.net blog Service
+Written on Express and deployment on AWS lambda.
 
 ## Getting Started
 ### Installing
