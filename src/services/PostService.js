@@ -62,6 +62,7 @@ class PostService {
             slug: post.slug, 
             desc: post.desc, 
             content: post.content, 
+            categories: post.categories,
             updatedAt: Date.now() 
         } }
         const result = await collection.findOneAndUpdate(query, values, { returnOriginal: false });
