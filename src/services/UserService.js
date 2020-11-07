@@ -22,6 +22,8 @@ class UserService {
             const token = jwt.sign({ 
                 username: user.username, 
                 email: user.email,
+                firstname: user.firstname,
+                lastname: user.lastname,
                 roles: user.roles
             }, signKey,
             { 
