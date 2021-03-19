@@ -1,0 +1,17 @@
+# serverless.yml
+service: anhnguyen-blog-service-apis
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: prod
+  region: ap-southeast-1
+
+functions:
+  app:
+    handler: lambda.handler
+    events:
+      - http: ANY /
+      - http: 'ANY {proxy+}'
+    environment:
+      NODE_ENV: production
