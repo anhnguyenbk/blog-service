@@ -13,5 +13,8 @@ functions:
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
+    cors:
+      - enabled: true
+      - origin: 'http://admin.anhng.net'
     environment:
       NODE_ENV: production
